@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McGregor X-Y Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .question {
+            margin: 15px 0;
+        }
+        .question button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .question button:hover {
+            background-color: #0056b3;
+        }
+        .question button.selected {
+            background-color: #28a745; /* Grøn baggrundsfarve */
+            color: white;
+        }
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .name-input {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>McGregor X-Y Test</h1>
+
+<div class="name-input">
+    <label for="name">Indtast dit navn:</label>
+    <input type="text" id="name" placeholder="Dit navn">
+</div>
+
+<div class="question" id="q1">
+    <p>1. Jeg tror, at folk arbejder bedst under stram kontrol.</p>
+    <button onclick="selectAnswer(1, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(1, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q2">
+    <p>2. Jeg stoler på, at folk kan udføre deres opgaver uden konstant opsyn.</p>
+    <button onclick="selectAnswer(2, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(2, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q3">
+    <p>3. De fleste mennesker vil undgå ansvar, hvis de kan.</p>
+    <button onclick="selectAnswer(3, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(3, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q4">
+    <p>4. Jeg tror, at folk kan tage ansvar og udvise selvkontrol.</p>
+    <button onclick="selectAnswer(4, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(4, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q5">
+    <p>5. Medarbejdere skal have klare instruktioner for at præstere godt.</p>
+    <button onclick="selectAnswer(5, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(5, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q6">
+    <p>6. Medarbejdere har brug for frihed til at træffe beslutninger selv.</p>
+    <button onclick="selectAnswer(6, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(6, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q7">
+    <p>7. Folk er mere motiverede af eksterne belønninger og straf.</p>
+    <button onclick="selectAnswer(7, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(7, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q8">
+    <p>8. Folk motiveres af indre drivkraft og engagement.</p>
+    <button onclick="selectAnswer(8, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(8, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q9">
+    <p>9. Det er nødvendigt at overvåge folk for at sikre produktivitet.</p>
+    <button onclick="selectAnswer(9, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(9, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q10">
+    <p>10. De fleste medarbejdere kan være produktive uden konstant overvågning.</p>
+    <button onclick="selectAnswer(10, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(10, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q11">
+    <p>11. Folk har en tendens til at undgå arbejde, hvis de ikke overvåges.</p>
+    <button onclick="selectAnswer(11, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(11, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q12">
+    <p>12. Jeg tror, at folk finder tilfredsstillelse i deres arbejde, når de får autonomi.</p>
+    <button onclick="selectAnswer(12, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(12, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q13">
+    <p>13. Folk har brug for klare mål og konsekvenser for at præstere.</p>
+    <button onclick="selectAnswer(13, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(13, 'Y', this)">Uenig</button>
+</div>
+
+<div class="question" id="q14">
+    <p>14. Jeg tror, at folk kan sætte deres egne mål og finde løsninger.</p>
+    <button onclick="selectAnswer(14, 'Y', this)">Enig</button>
+    <button onclick="selectAnswer(14, 'X', this)">Uenig</button>
+</div>
+
+<div class="question" id="q15">
+    <p>15. Uden stram ledelse vil folk ikke præstere på højt niveau.</p>
+    <button onclick="selectAnswer(15, 'X', this)">Enig</button>
+    <button onclick="selectAnswer(15, 'Y', this)">Uenig</button>
+</div>
+
+<button onclick="calculateResult()">Se resultat</button>
+
+<p id="result"></p>
+
+<script>
+    let scoreX = 0;
+    let scoreY = 0;
+
+    function selectAnswer(questionNumber, category, element) {
+        // Disable other buttons and apply 'selected' class to the clicked button
+        const buttons = document.querySelectorAll(`#q${questionNumber} button`);
+        buttons.forEach(button => {
+            button.classList.remove('selected');
+            button.disabled = false; // Re-enable buttons if needed
+        });
+        
+        // Apply the 'selected' class to the clicked button
+        element.classList.add('selected');
+
+        // Lock buttons after selection
+        buttons.forEach(button => button.disabled = true);
+
+        // Update scores based on category
+        if (category === 'X') {
+            scoreX++;
+        } else {
+            scoreY++;
+        }
+    }
+
+    function calculateResult() {
+        const resultElement = document.getElementById('result');
+        const name = document.getElementById('name').value;
+
+        if (name === "") {
+            resultElement.textContent = "Indtast venligst dit navn.";
+            return;
+        }
+
+        if (scoreX > scoreY) {
+            resultElement.textContent = name + ", du er et X-menneske baseret på McGregor's teori!";
+        } else {
+            resultElement.textContent = name + ", du er et Y-menneske baseret på McGregor's teori!";
+        }
+    }
+</script>
+
+</body>
+</html>
