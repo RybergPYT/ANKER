@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menneske Spil - McGregor X-Y Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #87CEEB; /* Himmelbaggrund */
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #87CEEB; /* Match baggrundsfarven */
+        }
+        #result {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007BFF;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Menneske Spil - McGregor X-Y Test</h1>
+
+<!-- Canvas til spillet -->
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<!-- Resultat -->
+<p id="result"></p>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Variabler til menneskets position og hastighed
+    let personX = 150; // Start midt på X-vejen
+    let personY = 50;  // Start fra toppen
+    const personWidth = 30;
+    const personHeight = 50;
+    const personSpeed = 5;
+    let xSpeed = 0;
+    let ySpeed = 0;
+
+    // Udsagn med positioner for to veje (X- og Y-vejen)
+    const statements = [
+        { text: "Folk arbejder bedst under stram kontrol.", x: 150, y: 150, width: 150, selected: false, category: "X" },
+        { text: "De fleste mennesker vil undgå ansvar, hvis de kan.", x: 150, y: 250, width: 150, selected: false, category: "X" },
+        { text: "Medarbejdere skal have klare instruktioner for at præstere godt.", x: 150, y: 350, width: 150, selected: false, category: "X" },
+        { text: "Folk er mere motiverede af eksterne belønninger og straf.", x: 150, y: 450, width: 150, selected: false, category: "X" },
+        { text: "Folk kan tage ansvar og udvise selvkontrol.", x: 550, y: 150, width: 150, selected: false, category: "Y" },
+        { text: "Folk motiveres af indre drivkraft og engagement.", x: 550, y: 250, width: 150, selected: false, category: "Y" },
+        { text: "Medarbejdere har brug for frihed til at træffe beslutninger selv.", x: 550, y: 350, width: 150, selected: false, category: "Y" },
+        { text: "Folk kan sætte deres egne mål og finde løsninger.", x: 550, y: 450, width: 150, selected: false, category: "Y" }
+    ];
+
+    let xScore = 0;
+    let yScore = 0;
+    const finishLineY = canvas.height - 100; // Målstregen tæt på bunden
+
+    // Event listeners for piletasterne
+    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keyup', keyUpHandler);
+
+    function keyDownHandler(e) {
+        if (e.key === "Right" || e.key === "ArrowRight") {
+            xSpeed = personSpeed;
+        } else if (e.key === "Left" || e.key === "ArrowLeft") {
+            xSpeed = -personSpeed;
+        } else if (e.key === "Up" || e.key === "ArrowUp") {
+            ySpeed = -personSpeed;
+        } else if (e.key === "Down" || e.key === "ArrowDown") {
+            ySpeed = personSpeed;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if (e.key === "Right" || e.key === "ArrowRight" || e.key === "Left" || e.key === "ArrowLeft") {
+            xSpeed = 0;
+        } else if (e.key === "Up" || e.key === "ArrowUp" || e.key === "Down" || e.key === "ArrowDown") {
+            ySpeed = 0;
+        }
+    }
+
+    // Tegn baggrunden og vejene vertikalt med bredde
+    function drawBackground() {
+        // Naturbaggrund
+        ctx.fillStyle = "#98FB98"; // Grøn baggrund (græs)
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Brede veje
+        ctx.fillStyle = "#333"; // Mørk asfalt
+        ctx.fillRect(100, 0, 200, canvas.height); // X-vejen
+        ctx.fillRect(500, 0, 200, canvas.height); // Y-vejen
+
+        // Stiplet linje på begge veje
+        ctx.strokeStyle = "#FFF";
+        ctx.lineWidth = 5;
+        ctx.setLineDash([20, 15]);
+
+        // Stiplet linje for X- og Y-vejen
+        ctx.beginPath();
+        ctx.moveTo(200, 0);
+        ctx.lineTo(200, canvas.height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(600, 0);
+        ctx.lineTo(600, canvas.height);
+        ctx.stroke();
+    }
+
+    // Tegn mennesket som en simpel rektangel
+    function drawPerson() {
+        ctx.fillStyle = "#FFD700";  // Gul farve til mennesket
+        ctx.fillRect(personX, personY, personWidth, personHeight);
+    }
+
+    // Funktion til at bryde tekst i flere linjer hvis det er for langt
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        let testLine = '';
+        let testWidth = 0;
+
+        for (let n = 0; n < words.length; n++) {
+            testLine = line + words[n] + ' ';
+            testWidth = ctx.measureText(testLine).width;
+            if (testWidth > maxWidth && n > 0) {
+                ctx.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, x, y);
+    }
+
+    // Tegn udsagnene inde på vejene og tilføj firkant om dem
+    function drawStatements() {
+        statements.forEach(statement => {
+            if (!statement.selected) {
+                // Tegn firkant om udsagnet
+                ctx.strokeStyle = "#FFF"; // Hvid firkant
+                ctx.lineWidth = 2;
+                ctx.strokeRect(statement.x - 10, statement.y - 30, statement.width + 20, 50); // Tegn rektanglen
+
+                // Tegn selve teksten
+                ctx.fillStyle = "#FFF"; // Hvid skrift for tydelig kontrast
+                ctx.font = "16px Arial";
+                wrapText(ctx, statement.text, statement.x, statement.y, statement.width, 18); // Brug wrapText til at bryde teksten
+            }
+        });
+    }
+
+    // Tegn målstregen visuelt som et mål
+    function drawFinishLine() {
+        ctx.fillStyle = "#FF0000"; // Rød farve til målstregen
+        ctx.fillRect(0, finishLineY, canvas.width, 10); // Gør målstregen bred og synlig
+
+        ctx.font = "bold 20px Arial";
+        ctx.fillStyle = "#FF0000";
+        ctx.fillText("MÅL", canvas.width / 2 - 30, finishLineY + 40); // Skriv "MÅL" som et målområde
+    }
+
+    // Tjek kollision mellem mennesket og udsagnene
+    function checkCollisions() {
+        statements.forEach(statement => {
+            if (!statement.selected &&
+                personX < statement.x + statement.width && personX + personWidth > statement.x &&
+                personY < statement.y && personY + personHeight > statement.y - 20) {
+                
+                statement.selected = true;
+
+                // Opdater score baseret på kategori
+                if (statement.category === "X") {
+                    xScore++;
+                } else if (statement.category === "Y") {
+                    yScore++;
+                }
+            }
+        });
+
+        // Tjek om mennesket når målstregen
+        if (personY >= finishLineY - personHeight) {
+            showResult();
+        }
+    }
+
+    // Vis resultatet når mennesket når målstregen
+    function showResult() {
+        const resultElement = document.getElementById('result');
+        if (xScore > yScore) {
+            resultElement.textContent = 'Du er et X-menneske baseret på McGregor\'s teori!';
+        } else {
+            resultElement.textContent = 'Du er et Y-menneske baseret på McGregor\'s teori!';
+        }
+    }
+
+    // Opdater canvaset hver frame
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+        drawPerson();
+        drawStatements();
+        drawFinishLine();
+        checkCollisions();
+
+        // Opdater menneskets position
+        personX += xSpeed;
+        personY += ySpeed;
+
+        // Forhindre mennesket i at gå uden for canvas
+        if (personX < 0) personX = 0;
+        if (personX + personWidth > canvas.width) personX = canvas.width - personWidth;
+        if (personY < 0) personY = 0;
+        if (personY + personHeight > canvas.height) personY = canvas.height - personHeight;
+
+        requestAnimationFrame(draw);
+    }
+
+    // Start spillet
+    draw();
+</script>
+
+</body>
+</html>
